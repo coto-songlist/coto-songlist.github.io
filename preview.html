@@ -2342,7 +2342,87 @@ function pick(){
 }
 document.getElementById("random").onclick=pick;document.getElementById("again").onclick=pick;document.getElementById("close").onclick=()=>modal.classList.remove("show");modal.onclick=e=>{if(e.target===modal)modal.classList.remove("show")};
 
-</script></body></html>
+</script>
+<script>
+(() => {
+  const selected = new Set();
+
+  function tagValues(card){
+    return new Set((card.getAttribute("data-smarttags") || "")
+      .split("|").map(s=>s.trim()).filter(Boolean));
+  }
+
+  function applySmartFilter(){
+    try{
+      if(typeof render === "function") render();
+    }catch(e){}
+
+    let visible = 0;
+    document.querySelectorAll(".artistGroup").forEach(group=>{
+      let groupVisible = 0;
+      group.querySelectorAll(".song").forEach(card=>{
+        const normalVisible = card.style.display !== "none";
+        let tagMatch = true;
+        if(selected.size){
+          const vals = tagValues(card);
+          for(const t of selected){
+            if(!vals.has(t)){ tagMatch=false; break; }
+          }
+        }
+        const show = normalVisible && tagMatch;
+        card.style.display = show ? "" : "none";
+        if(show){ groupVisible++; visible++; }
+      });
+      group.style.display = groupVisible ? "" : "none";
+    });
+
+    const count = document.getElementById("count");
+    if(count) count.textContent = `該当 ${visible} 曲`;
+
+    const status = document.getElementById("tagSelectedCount");
+    if(status) status.textContent = selected.size ? `${selected.size}個選択中` : "選択なし";
+
+    document.querySelectorAll(".miniTag[data-smarttag]").forEach(btn=>{
+      btn.classList.toggle("active", selected.has(btn.dataset.smarttag));
+      btn.setAttribute("aria-pressed", selected.has(btn.dataset.smarttag) ? "true" : "false");
+    });
+  }
+
+  document.addEventListener("click", e=>{
+    const btn = e.target.closest && e.target.closest(".miniTag[data-smarttag]");
+    if(btn){
+      e.preventDefault();
+      e.stopPropagation();
+      const t = btn.dataset.smarttag;
+      if(selected.has(t)) selected.delete(t);
+      else selected.add(t);
+      applySmartFilter();
+      return;
+    }
+
+    const reset = e.target.closest && e.target.closest("#tagExplorerReset");
+    if(reset){
+      e.preventDefault();
+      e.stopPropagation();
+      selected.clear();
+      applySmartFilter();
+    }
+  }, true);
+
+  document.querySelectorAll("[data-filter],[data-era],#searchBtn").forEach(el=>{
+    el.addEventListener("click",()=>setTimeout(applySmartFilter,0));
+  });
+  const q = document.getElementById("q");
+  if(q){
+    q.addEventListener("input",()=>setTimeout(applySmartFilter,0));
+    q.addEventListener("change",()=>setTimeout(applySmartFilter,0));
+  }
+
+  window.applySmartFilter = applySmartFilter;
+})();
+</script>
+
+</body></html>
 <style>
 @media(max-width:520px){
   .gachaWrap{margin:0 auto 7px!important;padding:0!important}
