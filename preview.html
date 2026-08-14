@@ -1611,6 +1611,15 @@ h1{
 .tagExplorerStatus{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:7px;font-size:9px;color:#948a83}
 .tagExplorerReset{border:0;background:transparent;color:#8b817a;text-decoration:underline;text-underline-offset:2px;font-size:9px;padding:0;cursor:pointer}
 
+
+.tagLogicNote{
+  margin-top:7px;
+  font-size:8.5px;
+  color:#aaa09a;
+  text-align:left;
+  line-height:1.35;
+}
+
 </style><!-- Song data source: note.com/famous_ixia9355/n/n7d9c6adb28dc -->
 </head><body>
 <svg height="0" style="position:absolute" width="0">
@@ -1773,7 +1782,7 @@ h1{
 <button class="miniTag season" data-smarttag="冬" type="button">冬</button>
 </div>
 </div>
-<div class="tagExplorerStatus"><span id="tagSelectedCount">選択なし</span><button class="tagExplorerReset" id="tagExplorerReset" type="button">タグを解除</button></div></div>
+<div class="tagLogicNote">同じ項目はどれか1つ・項目をまたぐと組み合わせ検索</div><div class="tagExplorerStatus"><span id="tagSelectedCount">選択なし</span><button class="tagExplorerReset" id="tagExplorerReset" type="button">タグを解除</button></div></div>
 </div>
 <div class="eras"><button class="chip showa" data-era="昭和">昭和</button><button class="chip heisei" data-era="平成">平成</button><button class="chip reiwa" data-era="令和">令和</button></div><div class="kanaFilterWrap"><div class="kanaFilters"><button data-kana="あ" type="button">あ</button><button data-kana="か" type="button">か</button><button data-kana="さ" type="button">さ</button><button data-kana="た" type="button">た</button><button data-kana="な" type="button">な</button><button data-kana="は" type="button">は</button><button data-kana="ま" type="button">ま</button><button data-kana="や" type="button">や</button><button data-kana="ら" type="button">ら</button><button data-kana="わ" type="button">わ</button></div></div>
 <div class="filterStatusRow"><button class="clearFilters" id="clearFilters" type="button">選択をすべて解除</button></div><div class="gachaFilterHint">タブを選択してガチャもできるよ！</div><div class="gachaWrap"><button class="gachaButton" id="random">
@@ -2015,7 +2024,22 @@ function isMatch(card){
   if(active.era&&card.dataset.era!==active.era)return false;
   if(active.smartTags&&active.smartTags.size){
     const tags=new Set((card.dataset.smarttags||"").split("|").filter(Boolean));
-    for(const t of active.smartTags){if(!tags.has(t))return false;}
+
+    /* 複数選択：
+       同じグループ内は OR（どれか1つ合えばOK）
+       別グループ同士は AND（ジャンル×雰囲気などは両方満たす） */
+    const groups={genre:[],mood:[],theme:[],season:[]};
+    document.querySelectorAll(".miniTag[data-smarttag].active").forEach(btn=>{
+      const group=btn.classList.contains("genre")?"genre":
+                  btn.classList.contains("mood")?"mood":
+                  btn.classList.contains("theme")?"theme":
+                  btn.classList.contains("season")?"season":"";
+      if(group)groups[group].push(btn.dataset.smarttag);
+    });
+
+    for(const selected of Object.values(groups)){
+      if(selected.length && !selected.some(t=>tags.has(t)))return false;
+    }
   }
   return true;
 }
@@ -2321,6 +2345,19 @@ render();
 const modal=document.getElementById("modal");
 function sb(s){let a=[];if(s.recommended)a.push(["⭐ おすすめ","yellow"]);if(s.popular)a.push(["🔥 定番","peach"]);if(s.new)a.push(["🆕 NEW","blue"]);if(s.originalsong)a.push(["🎼 オリジナル曲","mint"]);if(s.guitar)a.push(["🎸 ギター","mint"]);if(s.piano)a.push(["🎹 ピアノ","blue"]);if(s.era)a.push([s.era,s.era==="令和"?"lav":s.era==="昭和"?"mint":"beige"]);return a;}
 function currentGachaPool(){
+  const smartActive=active.smartTags&&active.smartTags.size;
+  if(smartActive){
+    const visiblePairs=new Set(
+      [...document.querySelectorAll(".song")]
+        .filter(card=>card.style.display!=="none")
+        .map(card=>{
+          const title=(card.querySelector(".title")?.textContent||"").trim();
+          const artist=(card.querySelector(".artist")?.textContent||"").trim();
+          return `${title}|||${artist}`;
+        })
+    );
+    return songs.filter(s=>visiblePairs.has(`${s.title}|||${s.artist}`));
+  }
   return songs.filter(s=>{
     for(const k of["recommended","popular","new","originalsong","guitar","piano"]){
       if(active[k] && !s[k])return false;
