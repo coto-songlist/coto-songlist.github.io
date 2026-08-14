@@ -3618,6 +3618,13 @@ h1{
 .badge{
   transform:none !important;
 }
+
+/* 絞り込み表示の根本修正：
+   display:grid !important より hidden を必ず優先させる */
+.song[hidden],
+.artistGroup[hidden]{
+  display:none !important;
+}
 </style><!-- Song data source: note.com/famous_ixia9355/n/n7d9c6adb28dc -->
 </head><body>
 <svg height="0" style="position:absolute" width="0">
@@ -4036,10 +4043,10 @@ function render(){
     let n=0;
     group.querySelectorAll(".song").forEach(card=>{
       const show=isMatch(card);
-      card.style.display=show?"":"none";
+      card.hidden=!show;
       if(show){n++;visibleCount++;}
     });
-    group.style.display=n?"":"none";
+    group.hidden=(n===0);
   });
   count.textContent=`該当 ${visibleCount} 曲`;
 }
