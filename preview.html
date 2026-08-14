@@ -3625,6 +3625,26 @@ h1{
 .artistGroup[hidden]{
   display:none !important;
 }
+
+/* PC表示：TOPのタブ群を中央揃え */
+@media(min-width: 769px){
+  .topFilters,
+  .topTabs,
+  .quickFilters,
+  .filterTabs{
+    justify-content:center !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+  }
+
+  /* 実際のタブコンテナがflex/gridどちらでも中央に寄るよう補正 */
+  .filters,
+  .topFilterRow,
+  .categoryFilters{
+    justify-content:center !important;
+    text-align:center !important;
+  }
+}
 </style><!-- Song data source: note.com/famous_ixia9355/n/n7d9c6adb28dc -->
 </head><body>
 <svg height="0" style="position:absolute" width="0">
@@ -4157,14 +4177,15 @@ document.addEventListener("click",async e=>{
     e.stopPropagation();
     const group=artistBtn.closest(".artistGroup");
     if(!group)return;
-    const artist=(group.dataset.artist||"").trim();
-    const lines=[...group.querySelectorAll(".song")].map(song=>{
-      const title=(song.querySelector(".title")?.textContent||"").trim();
-      const songArtist=(song.querySelector(".artist")?.textContent||artist).trim();
-      return title ? `${title} / ${songArtist}` : "";
-    }).filter(Boolean);
-    const ok=await copyTextSafe(lines.join(" "));
-    showCopyToast(ok ? `${artist}の全${lines.length}曲をコピーしました` : "コピーできませんでした");
+
+    const artist=(group.querySelector(".artistHeadingName")?.textContent||group.dataset.artist||"").trim();
+    const titles=[...group.querySelectorAll(".song .title")]
+      .map(el=>(el.textContent||"").trim())
+      .filter(Boolean);
+
+    const copyValue=`【${artist}】\n${titles.join("/")}`;
+    const ok=await copyTextSafe(copyValue);
+    showCopyToast(ok ? `${artist}の全${titles.length}曲をコピーしました` : "コピーできませんでした");
     return;
   }
 
@@ -4172,10 +4193,13 @@ document.addEventListener("click",async e=>{
   if(song){
     e.preventDefault();
     e.stopPropagation();
+
     const title=(song.querySelector(".title")?.textContent||"").trim();
-    const artist=(song.querySelector(".artist")?.textContent||"").trim();
+    const group=song.closest(".artistGroup");
+    const artist=(group?.querySelector(".artistHeadingName")?.textContent||group?.dataset.artist||song.dataset.artist||"").trim();
+
     if(!title)return;
-    const copyValue=artist ? `${title} / ${artist}` : title;
+    const copyValue=artist ? `${title}/${artist}` : title;
     const ok=await copyTextSafe(copyValue);
     showCopyToast(ok ? `「${copyValue}」をコピーしました` : "コピーできませんでした");
   }
