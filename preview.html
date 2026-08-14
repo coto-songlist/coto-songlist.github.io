@@ -4201,7 +4201,7 @@ document.addEventListener("click",async e=>{
     if(!title)return;
     const copyValue=artist ? `${title}/${artist}` : title;
     const ok=await copyTextSafe(copyValue);
-    showCopyToast(ok ? `「${copyValue}」をコピーしました` : "コピーできませんでした");
+    showCopyToast(ok ? `${copyValue}をコピーしました` : "コピーできませんでした");
   }
 });
 
