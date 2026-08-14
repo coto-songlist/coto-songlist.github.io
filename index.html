@@ -2003,7 +2003,38 @@ h1{
 .filters .row2 .chip:nth-child(2){background:#F6FCFD !important;border-color:#CDE8ED !important;color:var(--text) !important;}
 .eras .chip:nth-child(1){background:#FBF8FD !important;border-color:#DFCFE9 !important;color:var(--text) !important;}
 .eras .chip:nth-child(2){background:#FFF9F4 !important;border-color:#EFD8C2 !important;color:var(--text) !important;}
-.eras .chip:nth-child(3){background:#F8FCF4 !important;border-color:#D3E4BE !important;color:var(--text) !important;}</style><!-- Song data source: note.com/famous_ixia9355/n/n7d9c6adb28dc -->
+.eras .chip:nth-child(3){background:#F8FCF4 !important;border-color:#D3E4BE !important;color:var(--text) !important;}
+/* 雰囲気ボタン：10個すべて完全に同サイズ */
+.moodGroupSixFourFinal .tagGroupChips{
+  display:grid !important;
+  grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+  gap:6px !important;
+}
+.moodGroupSixFourFinal .tagGroupChips .miniTag{
+  grid-column:auto !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:26px !important;
+  min-height:26px !important;
+  padding:0 3px !important;
+  box-sizing:border-box !important;
+  white-space:nowrap !important;
+  font-size:clamp(7.5px,2.15vw,10px) !important;
+}
+.moodGroupSixFourFinal .tagGroupChips .miniTag:nth-child(7){
+  grid-column:2 !important;
+}
+.moodGroupSixFourFinal .tagGroupChips .miniTag:nth-child(8),
+.moodGroupSixFourFinal .tagGroupChips .miniTag:nth-child(9),
+.moodGroupSixFourFinal .tagGroupChips .miniTag:nth-child(10){
+  grid-column:auto !important;
+}
+
+/* 雰囲気：下段4個を左寄せ（サイズは上段と同一） */
+.moodGroupSixFourFinal .tagGroupChips .miniTag:nth-child(7){
+  grid-column:1 !important;
+}
+</style><!-- Song data source: note.com/famous_ixia9355/n/n7d9c6adb28dc -->
 </head><body>
 <svg height="0" style="position:absolute" width="0">
 <defs>
