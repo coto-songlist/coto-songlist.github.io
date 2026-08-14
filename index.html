@@ -3658,6 +3658,18 @@ h1{
   box-sizing:border-box !important;
 }
 </style><!-- Song data source: note.com/famous_ixia9355/n/n7d9c6adb28dc -->
+
+<style id="copyToastExactFix">
+.copyToast{
+  white-space:pre-line !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+  max-width:92vw !important;
+  width:max-content !important;
+  text-align:center !important;
+  line-height:1.35 !important;
+}
+</style>
 </head><body>
 <svg height="0" style="position:absolute" width="0">
 <defs>
@@ -4181,12 +4193,13 @@ async function copyTextSafe(value){
   }
 }
 
-/* イベント委譲にして、表示更新後でも必ず曲名タップが効く */
+/* コピー機能：曲名タップ + アーティスト内一括コピー */
 document.addEventListener("click",async e=>{
   const artistBtn=e.target.closest(".artistCopyBtn");
   if(artistBtn){
     e.preventDefault();
     e.stopPropagation();
+
     const group=artistBtn.closest(".artistGroup");
     if(!group)return;
 
@@ -4195,9 +4208,13 @@ document.addEventListener("click",async e=>{
       .map(el=>(el.textContent||"").trim())
       .filter(Boolean);
 
-    const copyValue=`【${artist}】\n${titles.join("/")}`;
+    const copyValue="【"+artist+"】\n"+titles.join("/");
     const ok=await copyTextSafe(copyValue);
-    showCopyToast(ok ? `${artist}の全${titles.length}曲をコピーしました` : "コピーできませんでした");
+
+    showCopyToast(ok
+      ? "【"+artist+"】\n"+titles.join("/")+"\nをコピーしました"
+      : "コピーできませんでした"
+    );
     return;
   }
 
@@ -4207,13 +4224,17 @@ document.addEventListener("click",async e=>{
     e.stopPropagation();
 
     const title=(song.querySelector(".title")?.textContent||"").trim();
+    if(!title)return;
+
     const group=song.closest(".artistGroup");
     const artist=(group?.querySelector(".artistHeadingName")?.textContent||group?.dataset.artist||song.dataset.artist||"").trim();
+    const copyValue=artist ? title+"/"+artist : title;
 
-    if(!title)return;
-    const copyValue=artist ? `${title}/${artist}` : title;
     const ok=await copyTextSafe(copyValue);
-    showCopyToast(ok ? `${copyValue}をコピーしました` : "コピーできませんでした");
+    showCopyToast(ok
+      ? copyValue+"\nをコピーしました"
+      : "コピーできませんでした"
+    );
   }
 });
 
