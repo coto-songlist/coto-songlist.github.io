@@ -4411,26 +4411,16 @@ render();
 const modal=document.getElementById("modal");
 function sb(s){let a=[];if(s.recommended)a.push(["⭐ おすすめ","yellow"]);if(s.popular)a.push(["🔥 定番","peach"]);if(s.new)a.push(["🆕 NEW","blue"]);if(s.originalsong)a.push(["🎼 オリジナル曲","mint"]);if(s.guitar)a.push(["🎸 ギター","mint"]);if(s.piano)a.push(["🎹 ピアノ","blue"]);return a;}
 function currentGachaPool(){
-  const smartActive=active.smartTags&&active.smartTags.size;
-  if(smartActive){
-    const visiblePairs=new Set(
-      [...document.querySelectorAll(".song")]
-        .filter(card=>card.style.display!=="none")
-        .map(card=>{
-          const title=(card.querySelector(".title")?.textContent||"").trim();
-          const artist=(card.querySelector(".artist")?.textContent||"").trim();
-          return `${title}|||${artist}`;
-        })
-    );
-    return songs.filter(s=>visiblePairs.has(`${s.title}|||${s.artist}`));
-  }
-  return songs.filter(s=>{
-    for(const k of["recommended","popular","new","originalsong","guitar","piano"]){
-      if(active[k] && !s[k])return false;
-    }
-    if(active.era && s.era!==active.era)return false;
-    return true;
-  });
+  /* 一覧とまったく同じ isMatch() 判定を使う。
+     ジャンル・特徴を含む現在の全絞り込み条件をそのままガチャに反映する。 */
+  const matchedOrders=new Set(
+    [...document.querySelectorAll("#list .song")]
+      .filter(card=>isMatch(card))
+      .map(card=>Number(card.dataset.order))
+      .filter(Number.isFinite)
+  );
+
+  return songs.filter(s=>matchedOrders.has(Number(s.order)));
 }
 function pick(){
   const pool=currentGachaPool();
